@@ -132,7 +132,26 @@ where
     }
 }
 
+impl Dot for DataDescription {
+    fn associated_data(&self) -> Option<Vec<DataDescription>> {
+        Some(vec![
+            DataDescription::from(&self.label_string).with_label("label_string"),
+            DataDescription::from(&self.hex_address_string).with_label("hex_address_string"),
+            DataDescription::from(&self.type_string).with_label("type_string"),
+            DataDescription::from(&self.data_string).with_label("data_string"),
+            DataDescription::from(&self.associated_data_descriptions)
+                .with_label("associated_data_descriptions"),
+        ])
+    }
+}
+
 impl Dot for u8 {
+    fn data(&self) -> Option<String> {
+        Some(self.to_string())
+    }
+}
+
+impl Dot for usize {
     fn data(&self) -> Option<String> {
         Some(self.to_string())
     }
@@ -143,6 +162,40 @@ impl Dot for String {
         Some(self.clone())
     }
 }
+
+impl Dot for &String {}
+
+impl<T> Dot for Option<T>
+where
+    T: Dot,
+{
+    fn data(&self) -> Option<String> {
+        Some(
+            match self {
+                Some(_) => "Some",
+                None => "None",
+            }
+            .into(),
+        )
+    }
+
+    fn associated_data(&self) -> Option<Vec<DataDescription>> {
+        self.as_ref().map(|x| vec![DataDescription::from(x)])
+    }
+}
+
+impl<T> Dot for &Option<T> {}
+
+impl<T> Dot for Vec<T>
+where
+    T: Dot,
+{
+    fn associated_data(&self) -> Option<Vec<DataDescription>> {
+        Some(self.iter().map(DataDescription::from).collect())
+    }
+}
+
+impl<T> Dot for &Vec<T> {}
 
 #[derive(strum_macros::ToString)]
 enum MyEnum {
@@ -172,7 +225,7 @@ impl Dot for MyEnum {
     }
 }
 
-struct MyStruct {
+struct MyStruct<'a> {
     my_u8: u8,
     my_string: String,
     my_ref: &'a String,
@@ -230,6 +283,20 @@ mod tests {
         };
         let my_struct_dot = (&my_struct).render_node();
         println!("{}", my_struct_dot);
+        panic!();
+    }
+
+    #[test]
+    fn test_data_description() {
+        let my_other_string = String::from("yabadabadoo!");
+        let my_struct = MyStruct {
+            my_u8: 42,
+            my_string: "HELLO WORLD".into(),
+            my_ref: &my_other_string,
+        };
+        let my_struct_description =
+            (&DataDescription::from(&my_struct).with_label("my_struct_description")).render_node();
+        println!("{}", my_struct_description);
         panic!();
     }
 }
