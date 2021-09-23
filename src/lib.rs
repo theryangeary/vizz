@@ -2,6 +2,8 @@ use std::string::ToString;
 
 fn html_encode(s: &str) -> String {
     s.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
 }
 
 fn render_table(table_rows: impl Iterator<Item = String>) -> String {
