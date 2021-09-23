@@ -123,6 +123,7 @@ enum MyEnum {
     Plain,
     WithU8(u8),
     WithU8AndString(u8, String),
+    WithStruct { my_u8: u8, my_string: String },
 }
 
 impl Dot for MyEnum {
@@ -137,6 +138,10 @@ impl Dot for MyEnum {
             MyEnum::WithU8AndString(a, b) => {
                 Some(vec![DataDescription::from(a), DataDescription::from(b)])
             }
+            MyEnum::WithStruct { my_u8, my_string } => Some(vec![
+                DataDescription::from(my_u8),
+                DataDescription::from(my_string),
+            ]),
         }
     }
 }
@@ -156,6 +161,18 @@ mod tests {
     #[test]
     fn test_enum() {
         let my_enum = MyEnum::WithU8AndString(8, String::from("hey"));
+        let my_enum_dot = (&my_enum).render_node();
+        println!("{}", my_enum_dot);
+        let my_enum = MyEnum::WithU8(8);
+        let my_enum_dot = (&my_enum).render_node();
+        println!("{}", my_enum_dot);
+        let my_enum = MyEnum::WithStruct {
+            my_u8: 8,
+            my_string: String::from("hey"),
+        };
+        let my_enum_dot = (&my_enum).render_node();
+        println!("{}", my_enum_dot);
+        let my_enum = MyEnum::Plain;
         let my_enum_dot = (&my_enum).render_node();
         println!("{}", my_enum_dot);
         panic!();
