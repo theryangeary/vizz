@@ -106,9 +106,12 @@ impl DataDescription {
         )
     }
 
-    fn with_label(self, label_string: String) -> Self {
+    fn with_label<T>(self, label_string: T) -> Self
+    where
+        T: Into<String>,
+    {
         Self {
-            label_string: Some(label_string),
+            label_string: Some(label_string.into()),
             ..self
         }
     }
@@ -172,13 +175,15 @@ impl Dot for MyEnum {
 struct MyStruct {
     my_u8: u8,
     my_string: String,
+    my_ref: &'a String,
 }
 
-impl Dot for MyStruct {
+impl<'a> Dot for MyStruct<'a> {
     fn associated_data(&self) -> Option<Vec<DataDescription>> {
         Some(vec![
-            DataDescription::from(&self.my_u8).with_label("my_u8".into()),
-            DataDescription::from(&self.my_string).with_label("my_string".into()),
+            DataDescription::from(&self.my_u8).with_label("my_u8"),
+            DataDescription::from(&self.my_string).with_label("my_string"),
+            DataDescription::from(&self.my_ref).with_label("my_ref"),
         ])
     }
 }
@@ -217,9 +222,11 @@ mod tests {
 
     #[test]
     fn test_struct() {
+        let my_other_string = String::from("yabadabadoo!");
         let my_struct = MyStruct {
             my_u8: 42,
             my_string: "HELLO WORLD".into(),
+            my_ref: &my_other_string,
         };
         let my_struct_dot = (&my_struct).render_node();
         println!("{}", my_struct_dot);
