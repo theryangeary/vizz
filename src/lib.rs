@@ -1,5 +1,9 @@
 use std::string::ToString;
 
+fn html_encode(s: &str) -> String {
+    s.replace("&", "&amp;")
+}
+
 fn render_table(table_rows: impl Iterator<Item = String>) -> String {
     format!(
         r#"<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">{}</TABLE>"#,
@@ -8,7 +12,9 @@ fn render_table(table_rows: impl Iterator<Item = String>) -> String {
 }
 
 pub trait Dot: Sized {
-    fn data_display(&self) -> String;
+    fn data(&self) -> Option<String> {
+        None
+    }
 
     fn associated_data(&self) -> Option<Vec<DataDescription>> {
         None
@@ -29,19 +35,22 @@ fn type_of<T>(_: &T) -> String {
 }
 
 pub struct DataDescription {
+    label_string: Option<String>,
     hex_address_string: String,
     type_string: String,
-    data_string: String,
+    data_string: Option<String>,
     associated_data_descriptions: Option<Vec<DataDescription>>,
 }
 
 impl DataDescription {
-    fn type_string_html_encoded(&self) -> String {
-        self.type_string.replace("&", "&amp;")
-    }
-
-    fn data_string_html_encoded(&self) -> String {
-        self.data_string.replace("&", "&amp;")
+    fn render_label_table_data(&self) -> String {
+        match &self.label_string {
+            Some(label_string) => format!(
+                r#"<TD PORT="{}-label">{}</TD>"#,
+                self.hex_address_string, label_string
+            ),
+            None => String::new(),
+        }
     }
 
     fn render_hex_address_table_data(&self) -> String {
@@ -54,16 +63,19 @@ impl DataDescription {
         format!(
             r#"<TD PORT="{}-type"><B>{}</B></TD>"#,
             self.hex_address_string,
-            self.type_string_html_encoded()
+            html_encode(&self.type_string)
         )
     }
 
     fn render_value_table_data(&self) -> String {
-        format!(
-            r#"<TD PORT="{}-value">{}</TD>"#,
-            self.hex_address_string,
-            self.data_string_html_encoded()
-        )
+        match &self.data_string {
+            Some(data_string) => format!(
+                r#"<TD PORT="{}-value">{}</TD>"#,
+                self.hex_address_string,
+                html_encode(data_string)
+            ),
+            None => String::new(),
+        }
     }
 
     fn render_associated_data_table(&self) -> String {
@@ -77,18 +89,26 @@ impl DataDescription {
                         .map(DataDescription::render_table_row),
                 )
             ),
-            None => String::from(""),
+            None => String::new(),
         }
     }
 
     fn render_table_row(&self) -> String {
         format!(
-            r#"<TR>"{}"{}{}{}</TR>"#,
+            r#"<TR>{}"{}"{}{}{}</TR>"#,
+            self.render_label_table_data(),
             self.render_hex_address_table_data(),
             self.render_type_table_data(),
             self.render_value_table_data(),
             self.render_associated_data_table(),
         )
+    }
+
+    fn with_label(self, label_string: String) -> Self {
+        Self {
+            label_string: Some(label_string),
+            ..self
+        }
     }
 }
 
@@ -98,23 +118,24 @@ where
 {
     fn from(t: &T) -> Self {
         Self {
+            label_string: None,
             hex_address_string: format!("{:?}", t as *const _),
             type_string: type_of(t),
-            data_string: t.data_display(),
+            data_string: t.data(),
             associated_data_descriptions: t.associated_data(),
         }
     }
 }
 
 impl Dot for u8 {
-    fn data_display(&self) -> String {
-        self.to_string()
+    fn data(&self) -> Option<String> {
+        Some(self.to_string())
     }
 }
 
 impl Dot for String {
-    fn data_display(&self) -> String {
-        self.clone()
+    fn data(&self) -> Option<String> {
+        Some(self.clone())
     }
 }
 
@@ -127,8 +148,8 @@ enum MyEnum {
 }
 
 impl Dot for MyEnum {
-    fn data_display(&self) -> String {
-        self.to_string()
+    fn data(&self) -> Option<String> {
+        Some(self.to_string())
     }
 
     fn associated_data(&self) -> Option<Vec<DataDescription>> {
@@ -143,6 +164,20 @@ impl Dot for MyEnum {
                 DataDescription::from(my_string),
             ]),
         }
+    }
+}
+
+struct MyStruct {
+    my_u8: u8,
+    my_string: String,
+}
+
+impl Dot for MyStruct {
+    fn associated_data(&self) -> Option<Vec<DataDescription>> {
+        Some(vec![
+            DataDescription::from(&self.my_u8).with_label("my_u8".into()),
+            DataDescription::from(&self.my_string).with_label("my_string".into()),
+        ])
     }
 }
 
@@ -175,6 +210,17 @@ mod tests {
         let my_enum = MyEnum::Plain;
         let my_enum_dot = (&my_enum).render_node();
         println!("{}", my_enum_dot);
+        panic!();
+    }
+
+    #[test]
+    fn test_struct() {
+        let my_struct = MyStruct {
+            my_u8: 42,
+            my_string: "HELLO WORLD".into(),
+        };
+        let my_struct_dot = (&my_struct).render_node();
+        println!("{}", my_struct_dot);
         panic!();
     }
 }
