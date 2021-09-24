@@ -1,4 +1,8 @@
+use std::error::Error;
+use std::fs::File;
+
 use visualize::DataDescription;
+use visualize::Graph;
 use visualize::Visualize;
 
 struct MyStruct<'a> {
@@ -17,13 +21,23 @@ impl<'a> Visualize for MyStruct<'a> {
     }
 }
 
-pub fn main() {
+pub fn main() -> Result<(), Box<dyn Error>> {
+    // create some data
     let unowned_string = String::from("yabadabadoo!");
     let my_struct = MyStruct {
         my_u8: 42,
         my_string: "HELLO WORLD".into(),
         my_ref: &unowned_string,
     };
-    let my_struct_dot = (&my_struct).render_node();
-    println!("{}", my_struct_dot);
+
+    // create file
+    let mut dot_file = File::create("my_struct.dot")?;
+
+    // create graph
+    Graph::new()
+        .add(&my_struct)
+        .add(&unowned_string)
+        .write_to(&mut dot_file)?;
+
+    Ok(())
 }

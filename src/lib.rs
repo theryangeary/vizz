@@ -1,6 +1,7 @@
 //! The `Visualize` trait allows any Rust data structure to be graphically represented using
 //! GraphViz and Dot.
 
+mod constants;
 mod data_description;
 mod graph;
 mod impls;

@@ -1,8 +1,12 @@
-use crate::data_description::DataDescription;
+use crate::data_description::{DataDescription, Value};
 use crate::util::*;
 
 pub trait Visualize: Sized {
-    fn data(&self) -> Option<String> {
+    fn data(&self) -> Option<Value> {
+        None
+    }
+
+    fn reference(&self) -> Option<String> {
         None
     }
 
@@ -14,9 +18,11 @@ pub trait Visualize: Sized {
         let data_description = DataDescription::from(self);
         format!(
             r#"  node [shape=plaintext]
-    "{}" [label=<{}>];"#,
+    "{}" [label=<{}>];
+    {}"#,
             data_description.hex_address_string(),
-            render_table(std::iter::once(data_description.render_table_row()))
+            render_table(std::iter::once(data_description.render_table_row())),
+            data_description.render_references(data_description.hex_address_string())
         )
     }
 }

@@ -53,7 +53,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add(&enum_with_named_fields)
         .add(&enum_with_u8)
         .add(&enum_with_u8_and_string)
-        .write_to(&mut dot_file);
+        .write_to(&mut dot_file)?;
 
     Ok(())
 }
