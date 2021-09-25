@@ -135,7 +135,7 @@ impl DataDescription {
 
     pub fn render_table_row(&self) -> String {
         format!(
-            r#"<TR>{}{}{}{}{}</TR>"#,
+            "<TR>{}{}{}{}{}</TR>",
             self.render_label_table_data(),
             self.render_hex_address_table_data(),
             self.render_type_table_data(),
