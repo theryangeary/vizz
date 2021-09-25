@@ -180,3 +180,15 @@ impl Visualize for DataDescription {
         ])
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_label() {
+        let label = "my_test_u8";
+        let data_description = DataDescription::from(&8u8).with_label(label);
+        assert_eq!(data_description.label_string.unwrap(), label);
+    }
+}

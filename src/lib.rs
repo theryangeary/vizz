@@ -8,9 +8,10 @@ mod impls;
 mod util;
 mod visualize;
 
-pub use data_description::DataDescription;
-pub use graph::Graph;
-pub use visualize::Visualize;
+pub use crate::data_description::DataDescription;
+pub use crate::data_description::Value;
+pub use crate::graph::Graph;
+pub use crate::visualize::Visualize;
 
 #[cfg(test)]
 mod tests {
