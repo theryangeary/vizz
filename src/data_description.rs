@@ -8,6 +8,7 @@ pub enum Value {
 }
 
 #[readonly::make]
+#[derive(Default)]
 pub struct DataDescription {
     pub label_string: Option<String>,
     pub hex_address_string: String,
@@ -94,6 +95,7 @@ impl DataDescription {
             self.hex_address_string,
         )
     }
+
     fn render_type_table_data(&self) -> String {
         format!(
             r#"<TD PORT="{}"><B>{}</B></TD>"#,
@@ -103,14 +105,17 @@ impl DataDescription {
     }
 
     fn render_value_table_data(&self) -> String {
-        format!(
-            r#"<TD PORT="{}">{}</TD>"#,
-            self.render_value_port(),
-            match &self.value {
-                Some(Value::Owned(value)) => html_encode(value),
-                _ => String::new(),
-            }
-        )
+        match &self.value {
+            Some(value) => format!(
+                r#"<TD PORT="{}">{}</TD>"#,
+                self.render_value_port(),
+                match value {
+                    Value::Owned(data) => html_encode(data),
+                    Value::Referenced(_) => String::new(),
+                }
+            ),
+            None => String::new(),
+        }
     }
 
     fn render_associated_data_table(&self) -> String {
@@ -130,7 +135,7 @@ impl DataDescription {
 
     pub fn render_table_row(&self) -> String {
         format!(
-            r#"<TR>{}"{}"{}{}{}</TR>"#,
+            r#"<TR>{}{}{}{}{}</TR>"#,
             self.render_label_table_data(),
             self.render_hex_address_table_data(),
             self.render_type_table_data(),
@@ -183,6 +188,11 @@ impl Visualize for DataDescription {
 
 #[cfg(test)]
 mod test {
+    //! Tests for DataDescription functionality
+    //!
+    //! Any long and complicated dot graph strings have been manually verified through visual
+    //! inspection.
+
     use super::*;
 
     #[test]
@@ -190,5 +200,203 @@ mod test {
         let label = "my_test_u8";
         let data_description = DataDescription::from(&8u8).with_label(label);
         assert_eq!(data_description.label_string.unwrap(), label);
+    }
+
+    #[test]
+    fn test_render_table_row_primitive() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_label"));
+        let type_string = String::from("u8");
+        let value = Some(Value::Owned(String::from("145")));
+        let associated_data_descriptions = None;
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-label\">my_label</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>u8</B></TD><TD PORT=\"0x12345678-value\">145</TD></TR>");
+    }
+
+    #[test]
+    fn test_render_table_row_enum_plain() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_label"));
+        let type_string = String::from("foo::bar::Enum");
+        let value = Some(Value::Owned(String::from("MyEnumVariant")));
+        let associated_data_descriptions = None;
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-label\">my_label</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>foo::bar::Enum</B></TD><TD PORT=\"0x12345678-value\">MyEnumVariant</TD></TR>");
+    }
+
+    #[test]
+    fn test_render_table_row_enum_tuple() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = None;
+        let type_string = String::from("u8");
+        let value = Some(Value::Owned(String::from("178")));
+        let associated_data_descriptions = None;
+
+        let inner1 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = None;
+        let type_string = String::from("alloc::string::String");
+        let value = Some(Value::Owned(String::from("abcdefghi")));
+        let associated_data_descriptions = None;
+
+        let inner2 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_label"));
+        let type_string = String::from("foo::bar::Enum");
+        let value = Some(Value::Owned(String::from("MyEnumVariant")));
+        let associated_data_descriptions = Some(vec![inner1, inner2]);
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-label\">my_label</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>foo::bar::Enum</B></TD><TD PORT=\"0x12345678-value\">MyEnumVariant</TD><TD PORT=\"0x12345678-associated-data\"><TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>u8</B></TD><TD PORT=\"0x12345678-value\">178</TD></TR><TR><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>alloc::string::String</B></TD><TD PORT=\"0x12345678-value\">abcdefghi</TD></TR></TABLE></TD></TR>");
+    }
+
+    #[test]
+    fn test_render_table_row_enum_struct() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_u8"));
+        let type_string = String::from("u8");
+        let value = Some(Value::Owned(String::from("178")));
+        let associated_data_descriptions = None;
+
+        let inner1 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_string"));
+        let type_string = String::from("alloc::string::String");
+        let value = Some(Value::Owned(String::from("abcdefghi")));
+        let associated_data_descriptions = None;
+
+        let inner2 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_label"));
+        let type_string = String::from("foo::bar::Enum");
+        let value = Some(Value::Owned(String::from("MyEnumVariant")));
+        let associated_data_descriptions = Some(vec![inner1, inner2]);
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-label\">my_label</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>foo::bar::Enum</B></TD><TD PORT=\"0x12345678-value\">MyEnumVariant</TD><TD PORT=\"0x12345678-associated-data\"><TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"0x12345678-label\">my_u8</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>u8</B></TD><TD PORT=\"0x12345678-value\">178</TD></TR><TR><TD PORT=\"0x12345678-label\">my_string</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>alloc::string::String</B></TD><TD PORT=\"0x12345678-value\">abcdefghi</TD></TR></TABLE></TD></TR>");
+    }
+
+    #[test]
+    fn test_render_table_row_struct() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_u8"));
+        let type_string = String::from("u8");
+        let value = Some(Value::Owned(String::from("178")));
+        let associated_data_descriptions = None;
+
+        let inner1 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_string"));
+        let type_string = String::from("alloc::string::String");
+        let value = Some(Value::Owned(String::from("abcdefghi")));
+        let associated_data_descriptions = None;
+
+        let inner2 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = None;
+        let type_string = String::from("foo::bar::Struct");
+        let value = None;
+        let associated_data_descriptions = Some(vec![inner1, inner2]);
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>foo::bar::Struct</B></TD><TD PORT=\"0x12345678-associated-data\"><TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"0x12345678-label\">my_u8</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>u8</B></TD><TD PORT=\"0x12345678-value\">178</TD></TR><TR><TD PORT=\"0x12345678-label\">my_string</TD><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>alloc::string::String</B></TD><TD PORT=\"0x12345678-value\">abcdefghi</TD></TR></TABLE></TD></TR>");
+    }
+
+    #[test]
+    fn test_render_table_row_ref_to_struct() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = None;
+        let type_string = String::from("&foo::bar::Struct");
+        let value = Some(Value::Referenced(String::from("0xcafebaee")));
+        let associated_data_descriptions = None;
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>&amp;foo::bar::Struct</B></TD><TD PORT=\"0x12345678-value\"></TD></TR>");
     }
 }
