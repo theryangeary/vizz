@@ -40,3 +40,8 @@ pub fn render_associated_data_port(hex_address_string: &str) -> String {
 pub fn type_of<T>(_: &T) -> String {
     std::any::type_name::<T>().into()
 }
+
+pub fn address_of<T>(t: &T) -> String {
+    let ptr: *const _ = t;
+    format!("{:?}", ptr)
+}

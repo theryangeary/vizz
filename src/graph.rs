@@ -2,6 +2,7 @@ use std::io::{Result, Write};
 
 use crate::Visualize;
 
+#[derive(Debug, Clone)]
 pub struct Graph {
     name: String,
     buffer: String,
@@ -55,11 +56,12 @@ impl Default for Graph {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::util;
 
     #[test]
     fn test_generate_graph() {
         let target = 8u8;
-        let target_address_string = format!("{:?}", &target as *const _);
+        let target_address_string = util::address_of(&target);
         let graph_name = "test_generate_graph";
         let graph = Graph::new().set_name(graph_name).add_node(&target);
         assert_eq!(graph.render(), format!("digraph {1} {{\n  node [shape=plaintext]\n    \"{0}\" [label=<<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"{0}-address\"><I>{0}</I></TD><TD PORT=\"{0}-type\"><B>u8</B></TD><TD PORT=\"{0}-value\">8</TD></TR></TABLE>>];\n    \n}}", target_address_string, graph_name));

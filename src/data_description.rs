@@ -1,14 +1,14 @@
-use crate::util::*;
+use crate::util;
 use crate::Visualize;
 
-#[derive(strum_macros::ToString)]
+#[derive(strum_macros::ToString, Debug, Clone)]
 pub enum Value {
     Owned(String),
     Referenced(String),
 }
 
 #[readonly::make]
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct DataDescription {
     pub label_string: Option<String>,
     pub hex_address_string: String,
@@ -29,23 +29,23 @@ impl DataDescription {
     }
 
     fn render_label_port(&self) -> String {
-        render_label_port(&self.hex_address_string)
+        util::render_label_port(&self.hex_address_string)
     }
 
     fn render_type_port(&self) -> String {
-        render_type_port(&self.hex_address_string)
+        util::render_type_port(&self.hex_address_string)
     }
 
     fn render_address_port(&self) -> String {
-        render_address_port(&self.hex_address_string)
+        util::render_address_port(&self.hex_address_string)
     }
 
     fn render_value_port(&self) -> String {
-        render_value_port(&self.hex_address_string)
+        util::render_value_port(&self.hex_address_string)
     }
 
     fn render_associated_data_port(&self) -> String {
-        render_associated_data_port(&self.hex_address_string)
+        util::render_associated_data_port(&self.hex_address_string)
     }
 
     fn render_reference(&self, node_name: &str) -> Option<String> {
@@ -55,7 +55,7 @@ impl DataDescription {
                 node_name,
                 self.render_value_port(),
                 target,
-                render_address_port(target)
+                util::render_address_port(target)
             ))
         } else {
             None
@@ -100,7 +100,7 @@ impl DataDescription {
         format!(
             r#"<TD PORT="{}"><B>{}</B></TD>"#,
             self.render_type_port(),
-            html_encode(&self.type_string)
+            util::html_encode(&self.type_string)
         )
     }
 
@@ -110,7 +110,7 @@ impl DataDescription {
                 r#"<TD PORT="{}">{}</TD>"#,
                 self.render_value_port(),
                 match value {
-                    Value::Owned(data) => html_encode(data),
+                    Value::Owned(data) => util::html_encode(data),
                     Value::Referenced(_) => String::new(),
                 }
             ),
@@ -123,7 +123,7 @@ impl DataDescription {
             Some(associated_data_descriptions) => format!(
                 r#"<TD PORT="{}">{}</TD>"#,
                 self.render_associated_data_port(),
-                render_table(
+                util::render_table(
                     associated_data_descriptions
                         .iter()
                         .map(DataDescription::render_table_row),
@@ -152,8 +152,8 @@ where
     fn from(t: &T) -> Self {
         Self {
             label_string: None,
-            hex_address_string: format!("{:?}", t as *const _),
-            type_string: type_of(t),
+            hex_address_string: util::address_of(t),
+            type_string: util::type_of(t),
             value: t.data(),
             associated_data_descriptions: t.associated_data(),
         }
