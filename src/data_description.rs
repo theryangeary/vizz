@@ -7,35 +7,16 @@ pub enum Value {
     Referenced(String),
 }
 
+#[readonly::make]
 pub struct DataDescription {
-    label_string: Option<String>,
-    hex_address_string: String,
-    type_string: String,
-    value: Option<Value>,
-    associated_data_descriptions: Option<Vec<DataDescription>>,
+    pub label_string: Option<String>,
+    pub hex_address_string: String,
+    pub type_string: String,
+    pub value: Option<Value>,
+    pub associated_data_descriptions: Option<Vec<DataDescription>>,
 }
 
 impl DataDescription {
-    pub fn label_string(&self) -> &Option<String> {
-        &self.label_string
-    }
-
-    pub fn hex_address_string(&self) -> &String {
-        &self.hex_address_string
-    }
-
-    pub fn type_string(&self) -> &String {
-        &self.type_string
-    }
-
-    pub fn value(&self) -> &Option<Value> {
-        &self.value
-    }
-
-    pub fn associated_data_descriptions(&self) -> &Option<Vec<DataDescription>> {
-        &self.associated_data_descriptions
-    }
-
     pub fn with_label<T>(self, label_string: T) -> Self
     where
         T: Into<String>,
@@ -83,7 +64,7 @@ impl DataDescription {
     pub fn render_references(&self, node_name: &str) -> String {
         let this_reference = self.render_reference(node_name).unwrap_or_else(String::new);
 
-        match self.associated_data_descriptions() {
+        match &self.associated_data_descriptions {
             Some(associated_data_descriptions) => associated_data_descriptions
                 .iter()
                 .fold(this_reference, |acc, associated_data| {

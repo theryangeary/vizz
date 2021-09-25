@@ -20,9 +20,9 @@ pub trait Visualize: Sized {
             r#"  node [shape=plaintext]
     "{}" [label=<{}>];
     {}"#,
-            data_description.hex_address_string(),
+            data_description.hex_address_string,
             render_table(std::iter::once(data_description.render_table_row())),
-            data_description.render_references(data_description.hex_address_string())
+            data_description.render_references(&data_description.hex_address_string)
         )
     }
 }
