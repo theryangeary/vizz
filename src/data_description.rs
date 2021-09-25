@@ -51,7 +51,7 @@ impl DataDescription {
     fn render_reference(&self, node_name: &str) -> Option<String> {
         if let Some(Value::Referenced(target)) = &self.value {
             Some(format!(
-                r#""{}":"{}" -> "{}":"{}""#,
+                "\"{}\":\"{}\" -> \"{}\":\"{}\"\n",
                 node_name,
                 self.render_value_port(),
                 target,
@@ -398,5 +398,52 @@ mod test {
         };
 
         assert_eq!(data_description.render_table_row(), "<TR><TD PORT=\"0x12345678-address\"><I>0x12345678</I></TD><TD PORT=\"0x12345678-type\"><B>&amp;foo::bar::Struct</B></TD><TD PORT=\"0x12345678-value\"></TD></TR>");
+    }
+
+    #[test]
+    fn test_render_references() {
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_u8_ref"));
+        let type_string = String::from("u8");
+        let value = Some(Value::Referenced(String::from("ref1")));
+        let associated_data_descriptions = None;
+
+        let inner1 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = Some(String::from("my_string_ref"));
+        let type_string = String::from("alloc::string::String");
+        let value = Some(Value::Referenced(String::from("ref2")));
+        let associated_data_descriptions = None;
+
+        let inner2 = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        let hex_address_string = String::from("0x12345678");
+        let label_string = None;
+        let type_string = String::from("foo::bar::Struct");
+        let value = None;
+        let associated_data_descriptions = Some(vec![inner1, inner2]);
+
+        let data_description = DataDescription {
+            hex_address_string,
+            label_string,
+            type_string,
+            value,
+            associated_data_descriptions,
+        };
+
+        assert_eq!(data_description.render_references("root-node-name"), "\"root-node-name\":\"0x12345678-value\" -> \"ref1\":\"ref1-address\"\n\"root-node-name\":\"0x12345678-value\" -> \"ref2\":\"ref2-address\"\n");
     }
 }
