@@ -46,6 +46,12 @@ impl Graph {
     }
 }
 
+impl Default for Graph {
+    fn default() -> Self {
+        Graph::new()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
