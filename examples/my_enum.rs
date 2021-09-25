@@ -4,6 +4,7 @@ use std::fs::File;
 
 use visualize::DataDescription;
 use visualize::Graph;
+use visualize::Value;
 use visualize::Visualize;
 
 #[derive(strum_macros::ToString)]
@@ -15,8 +16,8 @@ enum MyEnum {
 }
 
 impl Visualize for MyEnum {
-    fn data(&self) -> Option<String> {
-        Some(self.to_string())
+    fn data(&self) -> Option<Value> {
+        Some(Value::Owned(self.to_string()))
     }
 
     fn associated_data(&self) -> Option<Vec<DataDescription>> {
@@ -49,10 +50,11 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // create graph
     Graph::new()
-        .add(&plain_enum)
-        .add(&enum_with_named_fields)
-        .add(&enum_with_u8)
-        .add(&enum_with_u8_and_string)
+        .set_name("my_enum_visualization")
+        .add_node(&plain_enum)
+        .add_node(&enum_with_named_fields)
+        .add_node(&enum_with_u8)
+        .add_node(&enum_with_u8_and_string)
         .write_to(&mut dot_file)?;
 
     Ok(())

@@ -55,7 +55,7 @@ impl DataDescription {
                 node_name,
                 self.render_value_port(),
                 target,
-                render_address_port(&target)
+                render_address_port(target)
             ))
         } else {
             None

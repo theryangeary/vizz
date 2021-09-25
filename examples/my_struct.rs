@@ -35,8 +35,8 @@ pub fn main() -> Result<(), Box<dyn Error>> {
 
     // create graph
     Graph::new()
-        .add(&my_struct)
-        .add(&unowned_string)
+        .add_node(&my_struct)
+        .add_node(&unowned_string)
         .write_to(&mut dot_file)?;
 
     Ok(())
