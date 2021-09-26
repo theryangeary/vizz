@@ -12,8 +12,6 @@ readme = "README.md"
 
 [dependencies]
 readonly = "0.2"
-strum = "0.21"
-strum_macros = "0.21"
 vizz_derive = { version = "0.1.0", optional = true, path = "./vizz_derive" }
 
 [features]
@@ -21,3 +19,6 @@ default = ["derive"]
 
 # provide derive(Visualize) macro
 derive = ["vizz_derive"]
+
+[workspace]
+members = ["vizz_derive"]

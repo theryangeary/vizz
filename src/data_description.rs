@@ -1,7 +1,7 @@
 use crate::util;
 use crate::Visualize;
 
-#[derive(strum_macros::ToString, Debug, Clone)]
+#[derive(Debug, Clone)]
 /// The value of a [Visualize] implementer
 pub enum Value {
     /// The implementer owns this data and the data will appear as this string
@@ -199,32 +199,6 @@ where
             value: t.data(),
             associated_data_descriptions: t.associated_data(),
         }
-    }
-}
-
-impl Visualize for Value {
-    fn data(&self) -> Option<Value> {
-        Some(Value::Owned(self.to_string()))
-    }
-
-    fn associated_data(&self) -> Option<Vec<DataDescription>> {
-        match self {
-            Value::Owned(a) => Some(vec![DataDescription::from(a)]),
-            Value::Referenced(a) => Some(vec![DataDescription::from(a)]),
-        }
-    }
-}
-
-impl Visualize for DataDescription {
-    fn associated_data(&self) -> Option<Vec<DataDescription>> {
-        Some(vec![
-            DataDescription::from(&self.label_string).with_label("label_string"),
-            DataDescription::from(&self.hex_address_string).with_label("hex_address_string"),
-            DataDescription::from(&self.type_string).with_label("type_string"),
-            DataDescription::from(&self.value).with_label("value"),
-            DataDescription::from(&self.associated_data_descriptions)
-                .with_label("associated_data_descriptions"),
-        ])
     }
 }
 

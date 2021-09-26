@@ -32,8 +32,6 @@ pub trait Visualize: Sized {
     /// use vizz::Value;
     /// use vizz::Visualize;
     ///
-    /// /// Use strum to derive a `to_string` method, or implement one yourself
-    /// #[derive(strum_macros::ToString)]
     /// enum MyEnum {
     ///     SimpleVariant,
     ///     VariantWithData(u8),
@@ -41,7 +39,12 @@ pub trait Visualize: Sized {
     ///
     /// impl Visualize for MyEnum {
     ///     fn data(&self) -> Option<Value> {
-    ///         Some(Value::Owned(self.to_string()))
+    ///         Some(Value::Owned(
+    ///             match self {
+    ///                 MyEnum::SimpleVariant => "SimpleVariant",
+    ///                 MyEnum::VariantWithData(_) => "VariantWithData",
+    ///             }.into()
+    ///         ))
     ///     }
     /// }
     /// ```

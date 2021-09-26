@@ -7,7 +7,6 @@ use vizz::Graph;
 use vizz::Value;
 use vizz::Visualize;
 
-#[derive(strum_macros::ToString)]
 enum MyEnum {
     Plain,
     WithU8(u8),
@@ -17,7 +16,15 @@ enum MyEnum {
 
 impl Visualize for MyEnum {
     fn data(&self) -> Option<Value> {
-        Some(Value::Owned(self.to_string()))
+        Some(Value::Owned(
+            match self {
+                MyEnum::Plain => "Plain",
+                MyEnum::WithU8(_) => "WithU8",
+                MyEnum::WithU8AndString(_, _) => "WithU8AndString",
+                MyEnum::WithStruct { .. } => "WithStruct",
+            }
+            .into(),
+        ))
     }
 
     fn associated_data(&self) -> Option<Vec<DataDescription>> {
