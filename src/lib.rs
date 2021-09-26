@@ -8,6 +8,7 @@
 //! 1. Replace the crate::util::html_encode method with a proper implementation
 //! 1. Replace this list with an ez intro to the lib, which will probably look just like the
 //!    [Graph] docs
+//! 1. Automatically add referenced data to graphs
 //!
 //! Early adopters can make use of this crate by manually implementing [Visualize].
 //!
