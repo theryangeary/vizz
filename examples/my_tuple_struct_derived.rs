@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::fs::File;
 
-use vizz::DataDescription;
 use vizz::Graph;
 use vizz::Visualize;
 
