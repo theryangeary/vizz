@@ -10,9 +10,14 @@ documentation = "https://docs.rs/vizz"
 repository = "https://github.com/theryangeary/vizz"
 readme = "README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 readonly = "0.2"
 strum = "0.21"
 strum_macros = "0.21"
+vizz_derive = { version = "0.1.0", optional = true, path = "./vizz_derive" }
+
+[features]
+default = ["derive"]
+
+# provide derive(Visualize) macro
+derive = ["vizz_derive"]

@@ -36,3 +36,6 @@ pub use crate::data_description::DataDescription;
 pub use crate::data_description::Value;
 pub use crate::graph::Graph;
 pub use crate::visualize::Visualize;
+
+#[cfg(feature = "derive")]
+pub use vizz_derive::Visualize;
