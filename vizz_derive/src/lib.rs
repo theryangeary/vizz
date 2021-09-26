@@ -37,8 +37,8 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
 
             // return stringified enum variant name as data
             quote! {
-                fn data(&self) -> Option<Value> {
-                    Some(Value::Owned(match self {
+                fn data(&self) -> ::std::option::Option<::vizz::Value> {
+                    Some(::vizz::Value::Owned(match self {
                         #(#arms),*
                     }))
                 }
@@ -51,7 +51,7 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
         let body = match &ast.data {
             Data::Struct(struct_decl) => {
                 // turn member names into DataDescriptions with labels
-                let mut members = Vec::new();
+                let mut members = ::std::vec::Vec::new();
 
                 &struct_decl
                     .fields
@@ -61,17 +61,17 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
                         Some(ident) => {
                             let label = format!("{}", ident);
                             members.push(
-                                quote! { DataDescription::from(&self.#ident).with_label(#label) },
+                                quote! { ::vizz::DataDescription::from(&self.#ident).with_label(#label) },
                             );
                         }
                         None => {
                             let ident = Index::from(field_num);
-                            members.push(quote! { DataDescription::from(&self.#ident) });
+                            members.push(quote! { ::vizz::DataDescription::from(&self.#ident) });
                         }
                     });
 
                 // return vec of associated data
-                quote! { Some(vec![ #(#members),* ]) }
+                quote! { ::std::option::Option::Some(vec![ #(#members),* ]) }
             }
             Data::Enum(enum_decl) => {
                 // turn enum fields into DataDescriptions
@@ -81,45 +81,46 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
                     let ident = &variant.ident;
                     let mut members = Vec::new();
 
-                    let params =
-                        match &variant.fields {
-                            Fields::Named(fields) => {
-                                let mut param_names = Vec::new();
-                                for field in &fields.named {
-                                    let ident = &field
-                                        .ident
-                                        .as_ref()
-                                        .expect("named fields should have idents");
+                    let params = match &variant.fields {
+                        Fields::Named(fields) => {
+                            let mut param_names = Vec::new();
+                            for field in &fields.named {
+                                let ident = &field
+                                    .ident
+                                    .as_ref()
+                                    .expect("named fields should have idents");
 
-                                    let label = format!("{}", ident);
-                                    members.push(
-                                        quote! { DataDescription::from(#ident).with_label(#label) },
+                                let label = format!("{}", ident);
+                                members.push(
+                                        quote! { ::vizz::DataDescription::from(#ident).with_label(#label) },
                                     );
+                                param_names.push(quote! { #ident });
+                            }
+                            quote! { { #(#param_names),* } }
+                        }
+                        Fields::Unnamed(fields) => {
+                            let mut param_names = Vec::new();
+                            &fields
+                                .unnamed
+                                .iter()
+                                .enumerate()
+                                .for_each(|(field_num, field)| {
+                                    let ident = &field.ident.clone().unwrap_or(format_ident!(
+                                        "__VISUALIZE_PARAM_{}",
+                                        field_num
+                                    ));
+                                    members.push(quote! { ::vizz::DataDescription::from(#ident) });
                                     param_names.push(quote! { #ident });
-                                }
-                                quote! { { #(#param_names),* } }
-                            }
-                            Fields::Unnamed(fields) => {
-                                let mut param_names = Vec::new();
-                                &fields.unnamed.iter().enumerate().for_each(
-                                    |(field_num, field)| {
-                                        let ident = &field.ident.clone().unwrap_or(format_ident!(
-                                            "__VISUALIZE_PARAM_{}",
-                                            field_num
-                                        ));
-                                        members.push(quote! { DataDescription::from(#ident) });
-                                        param_names.push(quote! { #ident });
-                                    },
-                                );
-                                quote! { ( #(#param_names),* ) }
-                            }
-                            Fields::Unit => quote! {},
-                        };
+                                });
+                            quote! { ( #(#param_names),* ) }
+                        }
+                        Fields::Unit => quote! {},
+                    };
 
                     let match_result = if members.is_empty() {
-                        quote! { None }
+                        quote! { ::std::option::Option::None }
                     } else {
-                        quote! { Some(vec![ #(#members),* ]) }
+                        quote! { ::std::option::Option::Some(vec![ #(#members),* ]) }
                     };
 
                     arms.push(quote! { #name::#ident #params => #match_result });
@@ -144,6 +145,5 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
         }
     };
 
-    println!("{}", gen);
     gen.into()
 }
