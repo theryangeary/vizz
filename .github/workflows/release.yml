@@ -1,4 +1,4 @@
-name: Create Releases
+name: Publish Vizz Release
 
 on:
   push:
@@ -34,5 +34,8 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Create crates.io release
+    - name: Create vizz_derive crates.io release
+      run: cd vizz_derive && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }} && cd ..
+
+    - name: Create vizz crates.io release
       run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
