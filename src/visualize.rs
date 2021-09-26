@@ -121,6 +121,8 @@ pub trait Visualize: Sized {
     /// N.B. that this node is useless on its own and must be put in the context of a [Graph]. End
     /// users seeking to create an actual visualization should use the [Graph] struct instead of
     /// manually trying to use this method.
+    ///
+    /// [Graph]: crate::Graph
     fn render_node(&self) -> String {
         let data_description = DataDescription::from(self);
         format!(

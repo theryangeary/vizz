@@ -50,7 +50,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // create graph
     Graph::new()
-        .set_name("my_enum_visualization")
+        .set_id("my_enum_visualization")
         .add_node(&plain_enum)
         .add_node(&enum_with_named_fields)
         .add_node(&enum_with_u8)
