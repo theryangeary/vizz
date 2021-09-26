@@ -2,22 +2,54 @@ use crate::util;
 use crate::Visualize;
 
 #[derive(strum_macros::ToString, Debug, Clone)]
+/// The value of a [Visualize] implementer
 pub enum Value {
+    /// The implementer owns this data and the data will appear as this string
     Owned(String),
+    /// The implementer references this data and there will be a graph edge from this reference to the
+    /// referenced data
+    ///
+    /// The string contains a hex value starting with `0x`, which is the memory address of the
+    /// referenced data
     Referenced(String),
 }
 
 #[readonly::make]
 #[derive(Default, Debug, Clone)]
+/// The data needed to generate a graph node for a data structure
 pub struct DataDescription {
+    /// The label for this piece of data
+    ///
+    /// Typically this is the variable name or field name.
+    ///
+    /// Leaving this field as [None] will result in no TD box rendered for this field.
     pub label_string: Option<String>,
+    /// The memory location of this data, as a hex string prefaced with `0x`
     pub hex_address_string: String,
+    /// The fully qualified type of this data
     pub type_string: String,
+    /// The value of this data
+    ///
+    /// This may be:
+    ///
+    /// 1. some owned data, such as a primitive or an enum value, which will be rendered
+    /// as a string.
+    /// 1. some referenced data, which will be rendered as an arrow pointing to the referenced
+    ///    data.
+    /// 1. nothing, as would make sense for a struct, where the real data is the fields, which are
+    ///    represented in [DataDescription::associated_data_descriptions]
     pub value: Option<Value>,
+    /// The [DataDescription]s owned by this data
+    ///
+    /// These will be rendered as part of this data.
     pub associated_data_descriptions: Option<Vec<DataDescription>>,
 }
 
 impl DataDescription {
+    /// Add a label to this node
+    ///
+    /// Labels are generally optional but can be helpful for named structured data, like the
+    /// fields of a struct. Labels are less likely to be used for tuple structs or tuple enums.
     pub fn with_label<T>(self, label_string: T) -> Self
     where
         T: Into<String>,
@@ -48,6 +80,11 @@ impl DataDescription {
         util::render_associated_data_port(&self.hex_address_string)
     }
 
+    /// Create the DOT code to make an arrow from this node to another node
+    ///
+    /// The other node will need to be added to the graph separately from this call.
+    ///
+    /// The node_name is the name of the top level data this [DataDescription] lives inside of.
     fn render_reference(&self, node_name: &str) -> Option<String> {
         if let Some(Value::Referenced(target)) = &self.value {
             Some(format!(
@@ -62,6 +99,10 @@ impl DataDescription {
         }
     }
 
+    /// Create the DOT code to make all arrows from data owned by this node to the data they
+    /// reference
+    ///
+    /// The referenced nodes must be added to the graph separately.
     pub fn render_references(&self, node_name: &str) -> String {
         let this_reference = self.render_reference(node_name).unwrap_or_else(String::new);
 
@@ -133,6 +174,7 @@ impl DataDescription {
         }
     }
 
+    /// Create the HTML table row for this data
     pub fn render_table_row(&self) -> String {
         format!(
             "<TR>{}{}{}{}{}</TR>",
