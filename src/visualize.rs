@@ -14,8 +14,8 @@ pub trait Visualize: Sized {
     /// it conflicts with the implementation of [Visualize] for [u8] provided by this crate.
     ///
     /// ```ignore
-    /// use visualize::Value;
-    /// use visualize::Visualize;
+    /// use vizz::Value;
+    /// use vizz::Visualize;
     ///
     /// impl Visualize for u8 {
     ///     fn data(&self) -> Option<Value> {
@@ -29,8 +29,8 @@ pub trait Visualize: Sized {
     /// For enums, this will likely be the variant name.
     ///
     /// ```
-    /// use visualize::Value;
-    /// use visualize::Visualize;
+    /// use vizz::Value;
+    /// use vizz::Visualize;
     ///
     /// /// Use strum to derive a `to_string` method, or implement one yourself
     /// #[derive(strum_macros::ToString)]
@@ -72,8 +72,8 @@ pub trait Visualize: Sized {
     /// associated data, this will likely be [None].
     ///
     /// ```
-    /// use visualize::Visualize;
-    /// use visualize::DataDescription;
+    /// use vizz::Visualize;
+    /// use vizz::DataDescription;
     ///
     /// enum MyEnum {
     ///     SimpleVariant,
@@ -95,8 +95,8 @@ pub trait Visualize: Sized {
     /// For structs, this will likely be the struct members.
     ///
     /// ```
-    /// use visualize::Visualize;
-    /// use visualize::DataDescription;
+    /// use vizz::Visualize;
+    /// use vizz::DataDescription;
     ///
     /// struct MyStruct<'a> {
     ///     my_string: String,

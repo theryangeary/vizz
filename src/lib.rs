@@ -6,6 +6,8 @@
 //! 1. Create derive macro for automatically implementing Visualize for arbitrary types
 //! 1. Create impls for std library types
 //! 1. Replace the crate::util::html_encode method with a proper implementation
+//! 1. Replace this list with an ez intro to the lib, which will probably look just like the
+//!    [Graph] docs
 //!
 //! Early adopters can make use of this crate by manually implementing [Visualize].
 //!

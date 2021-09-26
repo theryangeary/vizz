@@ -2,10 +2,10 @@
 
 use std::fs::File;
 
-use visualize::DataDescription;
-use visualize::Graph;
-use visualize::Value;
-use visualize::Visualize;
+use vizz::DataDescription;
+use vizz::Graph;
+use vizz::Value;
+use vizz::Visualize;
 
 #[derive(strum_macros::ToString)]
 enum MyEnum {

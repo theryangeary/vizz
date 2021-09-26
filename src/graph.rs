@@ -10,7 +10,7 @@ use crate::Visualize;
 /// # Example
 ///
 /// ```
-/// use visualize::Graph;
+/// use vizz::Graph;
 /// use std::fs::File;
 ///
 /// struct MyStruct<'a> {
@@ -19,8 +19,8 @@ use crate::Visualize;
 ///     my_ref: &'a String,
 /// }
 ///
-/// # use visualize::Visualize;
-/// # use visualize::DataDescription;
+/// # use vizz::Visualize;
+/// # use vizz::DataDescription;
 /// #
 /// # impl<'a> Visualize for MyStruct<'a> {
 /// #     fn associated_data(&self) -> Option<Vec<DataDescription>> {

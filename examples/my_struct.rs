@@ -1,9 +1,9 @@
 use std::error::Error;
 use std::fs::File;
 
-use visualize::DataDescription;
-use visualize::Graph;
-use visualize::Visualize;
+use vizz::DataDescription;
+use vizz::Graph;
+use vizz::Visualize;
 
 struct MyStruct<'a> {
     my_u8: u8,

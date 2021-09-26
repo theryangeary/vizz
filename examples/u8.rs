@@ -1,4 +1,4 @@
-use visualize::Visualize;
+use vizz::Visualize;
 
 pub fn main() {
     let my_int: u8 = 128;
