@@ -1,5 +1,14 @@
 //! The `Visualize` trait allows any Rust data structure to be graphically represented using
 //! GraphViz and Dot.
+//!
+//! This crate is currently a work in progress. Major TODO items:
+//!
+//! 1. Create derive macro for automatically implementing Visualize for arbitrary types
+//! 1. Create impls for std library types
+//!
+//! Early adopters can make use of this crate by manually implementing [Visualize].
+//!
+//! Users will want to use the [Graph] datatype to generate visualizations.
 
 // set some allowed lints to warnings based on https://rust-unofficial.github.io/patterns/anti_patterns/deny-warnings.html#alternatives
 #![warn(
