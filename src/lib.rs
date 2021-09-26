@@ -30,7 +30,8 @@ mod constants;
 mod data_description;
 mod graph;
 mod impls;
-mod util;
+#[doc(hidden)]
+pub mod util;
 mod visualize;
 
 pub use crate::data_description::DataDescription;
