@@ -3,6 +3,7 @@ use quote::format_ident;
 use quote::quote;
 use syn::Data;
 use syn::Fields;
+use syn::Index;
 
 #[proc_macro_derive(Visualize)]
 pub fn visualize_derive(input: TokenStream) -> TokenStream {
@@ -52,15 +53,22 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
                 // turn member names into DataDescriptions with labels
                 let mut members = Vec::new();
 
-                for field in &struct_decl.fields {
-                    let ident = &field
-                        .ident
-                        .as_ref()
-                        .expect("named fields should have idents");
-
-                    let label = format!("{}", ident);
-                    members.push(quote! { DataDescription::from(&self.#ident).with_label(#label) });
-                }
+                &struct_decl
+                    .fields
+                    .iter()
+                    .enumerate()
+                    .for_each(|(field_num, field)| match &field.ident {
+                        Some(ident) => {
+                            let label = format!("{}", ident);
+                            members.push(
+                                quote! { DataDescription::from(&self.#ident).with_label(#label) },
+                            );
+                        }
+                        None => {
+                            let ident = Index::from(field_num);
+                            members.push(quote! { DataDescription::from(&self.#ident) });
+                        }
+                    });
 
                 // return vec of associated data
                 quote! { Some(vec![ #(#members),* ]) }
@@ -136,5 +144,6 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
         }
     };
 
+    println!("{}", gen);
     gen.into()
 }
