@@ -1,2 +1,4 @@
 /target
+vizz_derive/target
 Cargo.lock
+vizz_derive/Cargo.lock
