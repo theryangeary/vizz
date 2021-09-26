@@ -132,18 +132,20 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
         };
 
         quote! {
-            fn associated_data(&self) -> ::std::option::Option<std::vec::Vec<DataDescription>> {
+            fn associated_data(&self) -> ::std::option::Option<std::vec::Vec<::vizz::DataDescription>> {
                 #body
             }
         }
     };
 
-    let gen = quote! {
-        impl Visualize for #name {
+    let (impl_generics, ty_generics, where_clause) = &ast.generics.split_for_impl();
+
+    let impl_block = quote! {
+        impl #impl_generics ::vizz::Visualize for #name #ty_generics #where_clause {
             #data_fn_impl
             #associated_data_fn_impl
         }
     };
 
-    gen.into()
+    impl_block.into()
 }
