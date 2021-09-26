@@ -8,7 +8,7 @@ struct MyStruct<'a> {
 }
 
 #[test]
-fn test_graph() {
+fn test_struct() {
     let unowned_string = String::from("yabadabadoo!");
     let my_struct = MyStruct {
         my_u8: 42,
