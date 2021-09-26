@@ -1,0 +1,38 @@
+name: Create Releases
+
+on:
+  push:
+    tags:
+      - v*
+
+env:
+  RUSTFLAGS: -Dwarnings
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Check style
+      run: cargo fmt -- --check
+
+    - name: Run unit tests
+      run: cargo test --verbose
+
+    - name: Create GitHub release
+      id: create-release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: ''
+        draft: false
+        prerelease: false
+
+    - name: Create crates.io release
+      run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
