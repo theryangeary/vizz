@@ -1,10 +1,11 @@
 //! Example of deriving Visualize for an enum
+//!
+//! The generated graph has no references between nodes, and thus is a bit contrived. But it
+//! demonstrates adding unrelated nodes to the same graph.
 
 use std::fs::File;
 
-use vizz::DataDescription;
 use vizz::Graph;
-use vizz::Value;
 use vizz::Visualize;
 
 #[derive(Visualize)]
