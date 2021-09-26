@@ -1,7 +1,13 @@
 [package]
 name = "vizz_derive"
 version = "0.1.0"
+authors = ["Ryan Geary <rtgnj42@gmail.com>"]
 edition = "2018"
+description = "Derive macro for the Visualize trait"
+license = "MIT OR Apache-2.0"
+homepage = "https://crates.io/crates/vizz_derive"
+documentation = "https://docs.rs/vizz_derive"
+repository = "https://github.com/theryangeary/vizz"
 
 [lib]
 proc-macro = true
