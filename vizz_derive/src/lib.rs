@@ -44,7 +44,10 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-        _ => quote! {},
+        Data::Struct(_) => quote! {},
+        Data::Union(_) => panic!(
+            "Unions are not yet supported, see https://github.com/theryangeary/vizz/issues/1"
+        ),
     };
 
     let associated_data_fn_impl = {
@@ -128,7 +131,9 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
 
                 quote! { match self { #(#arms),* } }
             }
-            _ => panic!("Unions not supported at this time"),
+            Data::Union(_) => panic!(
+                "Unions are not yet supported, see https://github.com/theryangeary/vizz/issues/1"
+            ),
         };
 
         quote! {
