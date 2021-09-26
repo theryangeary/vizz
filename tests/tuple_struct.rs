@@ -4,7 +4,7 @@ use vizz::{Graph, Visualize};
 struct MyStruct<'a>(pub u8, pub String, pub &'a String);
 
 #[test]
-fn test_graph() {
+fn test_tuple_struct() {
     let unowned_string = String::from("yabadabadoo!");
     let my_struct = MyStruct(42, "HELLO WORLD".into(), &unowned_string);
 

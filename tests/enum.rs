@@ -9,7 +9,7 @@ enum MyEnum {
 }
 
 #[test]
-fn test_graph() {
+fn test_enum() {
     let plain_enum = MyEnum::Plain;
     let enum_with_u8_and_string = MyEnum::WithU8AndString(6, String::from("hey"));
     let enum_with_u8 = MyEnum::WithU8(10);
