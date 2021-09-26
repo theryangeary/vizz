@@ -56,7 +56,7 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
                 // turn member names into DataDescriptions with labels
                 let mut members = ::std::vec::Vec::new();
 
-                &struct_decl
+                struct_decl
                     .fields
                     .iter()
                     .enumerate()
@@ -103,7 +103,7 @@ fn impl_visualize(ast: &syn::DeriveInput) -> TokenStream {
                         }
                         Fields::Unnamed(fields) => {
                             let mut param_names = Vec::new();
-                            &fields
+                            fields
                                 .unnamed
                                 .iter()
                                 .enumerate()
