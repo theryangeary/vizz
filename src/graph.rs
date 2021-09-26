@@ -116,7 +116,7 @@ mod test {
     use crate::util;
 
     #[test]
-    fn test_generate_graph() {
+    fn test_render_graph() {
         let target = 8u8;
         let target_address_string = util::address_of(&target);
         let graph_id = "test_generate_graph";
