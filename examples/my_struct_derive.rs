@@ -1,3 +1,6 @@
+//! Example demonstrating how to derive the trait `Visualize` for a struct, and use it to generate
+//! a DOT file.
+
 use std::error::Error;
 use std::fs::File;
 

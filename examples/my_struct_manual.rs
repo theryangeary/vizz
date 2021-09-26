@@ -1,3 +1,7 @@
+//! This example implements a struct `MyStruct` and then implements the trait `Visualize` for it.
+//! End users will likely have no need to manually implement this trait, and should prefer to use
+//! the derive macro as shown in the `my_struct_derive` example.
+
 use std::error::Error;
 use std::fs::File;
 
