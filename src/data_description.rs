@@ -60,26 +60,6 @@ impl DataDescription {
         }
     }
 
-    fn render_label_port(&self) -> String {
-        util::render_label_port(&self.address)
-    }
-
-    fn render_type_port(&self) -> String {
-        util::render_type_port(&self.address)
-    }
-
-    fn render_address_port(&self) -> String {
-        util::render_address_port(&self.address)
-    }
-
-    fn render_value_port(&self) -> String {
-        util::render_value_port(&self.address)
-    }
-
-    fn render_associated_data_port(&self) -> String {
-        util::render_associated_data_port(&self.address)
-    }
-
     /// Create the DOT code to make an arrow from this node to another node
     ///
     /// The other node will need to be added to the graph separately from this call.
@@ -90,9 +70,9 @@ impl DataDescription {
             Some(format!(
                 "\"{}\":\"{}\" -> \"{}\":\"{}\"\n",
                 node_root_address,
-                self.render_value_port(),
+                self.address.render_value_port(),
                 target,
-                util::render_address_port(target)
+                target.render_address_port()
             ))
         } else {
             None
@@ -123,7 +103,7 @@ impl DataDescription {
             Some(label_string) => {
                 format!(
                     r#"<TD PORT="{}">{}</TD>"#,
-                    self.render_label_port(),
+                    self.address.render_label_port(),
                     label_string
                 )
             }
@@ -134,7 +114,7 @@ impl DataDescription {
     fn render_hex_address_table_data(&self) -> String {
         format!(
             r#"<TD PORT="{}"><I>{}</I></TD>"#,
-            self.render_address_port(),
+            self.address.render_address_port(),
             self.address,
         )
     }
@@ -142,7 +122,7 @@ impl DataDescription {
     fn render_type_table_data(&self) -> String {
         format!(
             r#"<TD PORT="{}"><B>{}</B></TD>"#,
-            self.render_type_port(),
+            self.address.render_type_port(),
             util::html_encode(&self.type_string)
         )
     }
@@ -151,7 +131,7 @@ impl DataDescription {
         match &self.value {
             Some(value) => format!(
                 r#"<TD PORT="{}">{}</TD>"#,
-                self.render_value_port(),
+                self.address.render_value_port(),
                 match value {
                     Value::Owned(data) => util::html_encode(data),
                     Value::Referenced(_) => String::new(),
@@ -165,7 +145,7 @@ impl DataDescription {
         match &self.associated_data_descriptions {
             Some(associated_data_descriptions) => format!(
                 r#"<TD PORT="{}">{}</TD>"#,
-                self.render_associated_data_port(),
+                self.address.render_associated_data_port(),
                 util::render_table(
                     associated_data_descriptions
                         .iter()
