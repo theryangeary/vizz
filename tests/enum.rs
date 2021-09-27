@@ -18,27 +18,24 @@ fn test_enum() {
         my_string: String::from("hey hey mic check 1 2 3"),
     };
 
-    let plain_address = vizz::util::address_of(&plain_enum);
-    let enum_with_u8_and_string_address = vizz::util::address_of(&enum_with_u8_and_string);
+    let plain_address = vizz::Address::new(&plain_enum);
+    let enum_with_u8_and_string_address = vizz::Address::new(&enum_with_u8_and_string);
     let (enum_with_u8_and_string_address_inner0, enum_with_u8_and_string_address_inner1) =
         if let MyEnum::WithU8AndString(a, b) = &enum_with_u8_and_string {
-            (vizz::util::address_of(a), vizz::util::address_of(b))
+            (vizz::Address::new(a), vizz::Address::new(b))
         } else {
             panic!("how could this be the wrong variant")
         };
-    let enum_with_u8_address = vizz::util::address_of(&enum_with_u8);
+    let enum_with_u8_address = vizz::Address::new(&enum_with_u8);
     let enum_with_u8_address_inner = if let MyEnum::WithU8(a) = &enum_with_u8 {
-        vizz::util::address_of(a)
+        vizz::Address::new(a)
     } else {
         panic!("how could this be the wrong variant")
     };
-    let enum_with_named_fields_address = vizz::util::address_of(&enum_with_named_fields);
+    let enum_with_named_fields_address = vizz::Address::new(&enum_with_named_fields);
     let (enum_with_named_fields_u8_address, enum_with_named_fields_string_address) =
         if let MyEnum::WithStruct { my_u8, my_string } = &enum_with_named_fields {
-            (
-                vizz::util::address_of(my_u8),
-                vizz::util::address_of(my_string),
-            )
+            (vizz::Address::new(my_u8), vizz::Address::new(my_string))
         } else {
             panic!("how could this be the wrong variant")
         };

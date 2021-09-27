@@ -26,6 +26,7 @@
     unused_results
 )]
 
+mod address;
 mod constants;
 mod data_description;
 mod graph;
@@ -34,6 +35,7 @@ mod impls;
 pub mod util;
 mod visualize;
 
+pub use crate::address::Address;
 pub use crate::data_description::DataDescription;
 pub use crate::data_description::Value;
 pub use crate::graph::Graph;

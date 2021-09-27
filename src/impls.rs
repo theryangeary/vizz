@@ -1,3 +1,4 @@
+use crate::address::Address;
 use crate::data_description::DataDescription;
 use crate::data_description::Value;
 use crate::Visualize;
@@ -24,7 +25,7 @@ impl Visualize for String {
 
 impl Visualize for &String {
     fn data(&self) -> Option<Value> {
-        Some(Value::Referenced(format!("{:p}", *self)))
+        Some(Value::Referenced(Address::new(*self)))
     }
 }
 

@@ -1,3 +1,4 @@
+use crate::address::Address;
 use crate::util;
 use crate::Visualize;
 
@@ -9,9 +10,8 @@ pub enum Value {
     /// The implementer references this data and there will be a graph edge from this reference to the
     /// referenced data
     ///
-    /// The string contains a hex value starting with `0x`, which is the memory address of the
-    /// referenced data
-    Referenced(String),
+    /// The memory address of the referenced data.
+    Referenced(Address),
 }
 
 #[readonly::make]
@@ -24,8 +24,8 @@ pub struct DataDescription {
     ///
     /// Leaving this field as [None] will result in no TD box rendered for this field.
     pub label_string: Option<String>,
-    /// The memory location of this data, as a hex string prefaced with `0x`
-    pub hex_address_string: String,
+    /// The memory location of this data
+    pub address: Address,
     /// The fully qualified type of this data
     pub type_string: String,
     /// The value of this data
@@ -61,35 +61,35 @@ impl DataDescription {
     }
 
     fn render_label_port(&self) -> String {
-        util::render_label_port(&self.hex_address_string)
+        util::render_label_port(&self.address)
     }
 
     fn render_type_port(&self) -> String {
-        util::render_type_port(&self.hex_address_string)
+        util::render_type_port(&self.address)
     }
 
     fn render_address_port(&self) -> String {
-        util::render_address_port(&self.hex_address_string)
+        util::render_address_port(&self.address)
     }
 
     fn render_value_port(&self) -> String {
-        util::render_value_port(&self.hex_address_string)
+        util::render_value_port(&self.address)
     }
 
     fn render_associated_data_port(&self) -> String {
-        util::render_associated_data_port(&self.hex_address_string)
+        util::render_associated_data_port(&self.address)
     }
 
     /// Create the DOT code to make an arrow from this node to another node
     ///
     /// The other node will need to be added to the graph separately from this call.
     ///
-    /// The node_name is the name of the top level data this [DataDescription] lives inside of.
-    fn render_reference(&self, node_name: &str) -> Option<String> {
+    /// The node_root_address is the name of the top level data this [DataDescription] lives inside of.
+    fn render_reference(&self, node_root_address: &Address) -> Option<String> {
         if let Some(Value::Referenced(target)) = &self.value {
             Some(format!(
                 "\"{}\":\"{}\" -> \"{}\":\"{}\"\n",
-                node_name,
+                node_root_address,
                 self.render_value_port(),
                 target,
                 util::render_address_port(target)
@@ -103,14 +103,16 @@ impl DataDescription {
     /// reference
     ///
     /// The referenced nodes must be added to the graph separately.
-    pub fn render_references(&self, node_name: &str) -> String {
-        let this_reference = self.render_reference(node_name).unwrap_or_else(String::new);
+    pub fn render_references(&self, node_root_address: &Address) -> String {
+        let this_reference = self
+            .render_reference(node_root_address)
+            .unwrap_or_else(String::new);
 
         match &self.associated_data_descriptions {
             Some(associated_data_descriptions) => associated_data_descriptions
                 .iter()
                 .fold(this_reference, |acc, associated_data| {
-                    acc + &associated_data.render_references(node_name)
+                    acc + &associated_data.render_references(node_root_address)
                 }),
             None => this_reference,
         }
@@ -133,7 +135,7 @@ impl DataDescription {
         format!(
             r#"<TD PORT="{}"><I>{}</I></TD>"#,
             self.render_address_port(),
-            self.hex_address_string,
+            self.address,
         )
     }
 
@@ -194,7 +196,7 @@ where
     fn from(t: &T) -> Self {
         Self {
             label_string: None,
-            hex_address_string: util::address_of(t),
+            address: Address::new(t),
             type_string: util::type_of(t),
             value: t.data(),
             associated_data_descriptions: t.associated_data(),
@@ -220,14 +222,14 @@ mod test {
 
     #[test]
     fn test_render_table_row_primitive() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_label"));
         let type_string = String::from("u8");
         let value = Some(Value::Owned(String::from("145")));
         let associated_data_descriptions = None;
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
@@ -239,14 +241,14 @@ mod test {
 
     #[test]
     fn test_render_table_row_enum_plain() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_label"));
         let type_string = String::from("foo::bar::Enum");
         let value = Some(Value::Owned(String::from("MyEnumVariant")));
         let associated_data_descriptions = None;
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
@@ -258,42 +260,42 @@ mod test {
 
     #[test]
     fn test_render_table_row_enum_tuple() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = None;
         let type_string = String::from("u8");
         let value = Some(Value::Owned(String::from("178")));
         let associated_data_descriptions = None;
 
         let inner1 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = None;
         let type_string = String::from("alloc::string::String");
         let value = Some(Value::Owned(String::from("abcdefghi")));
         let associated_data_descriptions = None;
 
         let inner2 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_label"));
         let type_string = String::from("foo::bar::Enum");
         let value = Some(Value::Owned(String::from("MyEnumVariant")));
         let associated_data_descriptions = Some(vec![inner1, inner2]);
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
@@ -305,42 +307,42 @@ mod test {
 
     #[test]
     fn test_render_table_row_enum_struct() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_u8"));
         let type_string = String::from("u8");
         let value = Some(Value::Owned(String::from("178")));
         let associated_data_descriptions = None;
 
         let inner1 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_string"));
         let type_string = String::from("alloc::string::String");
         let value = Some(Value::Owned(String::from("abcdefghi")));
         let associated_data_descriptions = None;
 
         let inner2 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_label"));
         let type_string = String::from("foo::bar::Enum");
         let value = Some(Value::Owned(String::from("MyEnumVariant")));
         let associated_data_descriptions = Some(vec![inner1, inner2]);
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
@@ -352,42 +354,42 @@ mod test {
 
     #[test]
     fn test_render_table_row_struct() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_u8"));
         let type_string = String::from("u8");
         let value = Some(Value::Owned(String::from("178")));
         let associated_data_descriptions = None;
 
         let inner1 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_string"));
         let type_string = String::from("alloc::string::String");
         let value = Some(Value::Owned(String::from("abcdefghi")));
         let associated_data_descriptions = None;
 
         let inner2 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = None;
         let type_string = String::from("foo::bar::Struct");
         let value = None;
         let associated_data_descriptions = Some(vec![inner1, inner2]);
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
@@ -399,14 +401,14 @@ mod test {
 
     #[test]
     fn test_render_table_row_ref_to_struct() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = None;
         let type_string = String::from("&foo::bar::Struct");
-        let value = Some(Value::Referenced(String::from("0xcafebaee")));
+        let value = Some(Value::Referenced(Address::from("0xcafebaee")));
         let associated_data_descriptions = None;
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
@@ -418,48 +420,48 @@ mod test {
 
     #[test]
     fn test_render_references() {
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_u8_ref"));
         let type_string = String::from("u8");
-        let value = Some(Value::Referenced(String::from("ref1")));
+        let value = Some(Value::Referenced(Address::from("ref1")));
         let associated_data_descriptions = None;
 
         let inner1 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_string_ref"));
         let type_string = String::from("alloc::string::String");
-        let value = Some(Value::Referenced(String::from("ref2")));
+        let value = Some(Value::Referenced(Address::from("ref2")));
         let associated_data_descriptions = None;
 
         let inner2 = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        let hex_address_string = String::from("0x12345678");
+        let address = Address::from("0x12345678");
         let label_string = None;
         let type_string = String::from("foo::bar::Struct");
         let value = None;
         let associated_data_descriptions = Some(vec![inner1, inner2]);
 
         let data_description = DataDescription {
-            hex_address_string,
+            address,
             label_string,
             type_string,
             value,
             associated_data_descriptions,
         };
 
-        assert_eq!(data_description.render_references("root-node-name"), "\"root-node-name\":\"0x12345678-value\" -> \"ref1\":\"ref1-address\"\n\"root-node-name\":\"0x12345678-value\" -> \"ref2\":\"ref2-address\"\n");
+        assert_eq!(data_description.render_references(&Address::from("root-node-name")), "\"root-node-name\":\"0x12345678-value\" -> \"ref1\":\"ref1-address\"\n\"root-node-name\":\"0x12345678-value\" -> \"ref2\":\"ref2-address\"\n");
     }
 }
