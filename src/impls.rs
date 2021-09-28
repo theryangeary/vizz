@@ -5,13 +5,19 @@ use crate::Visualize;
 
 use std::ops::Deref;
 
-macro_rules! impl_visualize_num {
+macro_rules! impl_visualize_data_to_string {
     ($ty:ident) => {
         impl Visualize for $ty {
             fn data(&self) -> Option<Value> {
                 Some(Value::Owned(self.to_string()))
             }
         }
+    };
+}
+
+macro_rules! impl_visualize_num {
+    ($ty:ident) => {
+        impl_visualize_data_to_string!($ty);
     };
 }
 
@@ -40,11 +46,8 @@ where
     }
 }
 
-impl Visualize for bool {
-    fn data(&self) -> Option<Value> {
-        Some(Value::Owned(self.to_string()))
-    }
-}
+impl_visualize_data_to_string!(bool);
+impl_visualize_data_to_string!(char);
 
 impl Visualize for String {
     fn data(&self) -> Option<Value> {

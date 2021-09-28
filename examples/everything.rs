@@ -24,6 +24,7 @@ struct MyStruct(
     [i64; 1],
     [usize; 32],
     bool,
+    char,
 );
 
 pub fn main() -> Result<(), Box<dyn Error>> {
@@ -48,6 +49,7 @@ pub fn main() -> Result<(), Box<dyn Error>> {
             25, 26, 27, 28, 29, 30, 31, 32,
         ],
         true,
+        'c',
     );
 
     // create file
