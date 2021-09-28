@@ -49,6 +49,16 @@ where
 impl_visualize_data_to_string!(bool);
 impl_visualize_data_to_string!(char);
 
+impl<'a, V> Visualize for &'a [V]
+where
+    V: Visualize,
+{
+    fn data(&self) -> Option<Value> {
+        (!self.is_empty())
+            .then(|| Value::referenced(Address::new(&self[0]), DataDescription::from(&self[0])))
+    }
+}
+
 impl Visualize for String {
     fn data(&self) -> Option<Value> {
         Some(Value::Owned(self.clone()))
