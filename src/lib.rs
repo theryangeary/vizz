@@ -31,6 +31,7 @@ mod constants;
 mod data_description;
 mod graph;
 mod impls;
+mod node;
 #[doc(hidden)]
 pub mod util;
 mod visualize;

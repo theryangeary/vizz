@@ -1,4 +1,5 @@
 use crate::address::Address;
+use crate::node::RenderedNode;
 use crate::util;
 use crate::Visualize;
 
@@ -11,7 +12,22 @@ pub enum Value {
     /// referenced data
     ///
     /// The memory address of the referenced data.
-    Referenced(Address),
+    Referenced(Address, RenderedNode),
+}
+
+impl Value {
+    /// Create a [Value::Referenced] from parts that implement [Into] for their respective field
+    /// types
+    pub fn referenced<IntoAddress, IntoRenderedNode>(
+        address: IntoAddress,
+        rendered_node: IntoRenderedNode,
+    ) -> Self
+    where
+        IntoAddress: Into<Address>,
+        IntoRenderedNode: Into<RenderedNode>,
+    {
+        Value::Referenced(address.into(), rendered_node.into())
+    }
 }
 
 #[readonly::make]
@@ -66,7 +82,7 @@ impl DataDescription {
     ///
     /// The node_root_address is the name of the top level data this [DataDescription] lives inside of.
     fn render_reference(&self, node_root_address: &Address) -> Option<String> {
-        if let Some(Value::Referenced(target)) = &self.value {
+        if let Some(Value::Referenced(target, _)) = &self.value {
             Some(format!(
                 "\"{}\":\"{}\" -> \"{}\":\"{}\"\n",
                 node_root_address,
@@ -134,7 +150,7 @@ impl DataDescription {
                 self.address.render_value_port(),
                 match value {
                     Value::Owned(data) => util::html_encode(data),
-                    Value::Referenced(_) => String::new(),
+                    Value::Referenced(_, _) => String::new(),
                 }
             ),
             None => String::new(),
@@ -384,7 +400,10 @@ mod test {
         let address = Address::from("0x12345678");
         let label_string = None;
         let type_string = String::from("&foo::bar::Struct");
-        let value = Some(Value::Referenced(Address::from("0xcafebaee")));
+        let value = Some(Value::Referenced(
+            Address::from("0xcafebaee"),
+            RenderedNode::from(String::from("this is unchecked")),
+        ));
         let associated_data_descriptions = None;
 
         let data_description = DataDescription {
@@ -403,7 +422,10 @@ mod test {
         let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_u8_ref"));
         let type_string = String::from("u8");
-        let value = Some(Value::Referenced(Address::from("ref1")));
+        let value = Some(Value::Referenced(
+            Address::from("ref1"),
+            RenderedNode::from(String::from("unchecked")),
+        ));
         let associated_data_descriptions = None;
 
         let inner1 = DataDescription {
@@ -417,7 +439,10 @@ mod test {
         let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_string_ref"));
         let type_string = String::from("alloc::string::String");
-        let value = Some(Value::Referenced(Address::from("ref2")));
+        let value = Some(Value::Referenced(
+            Address::from("ref2"),
+            RenderedNode::from(String::from("unchecked")),
+        ));
         let associated_data_descriptions = None;
 
         let inner2 = DataDescription {

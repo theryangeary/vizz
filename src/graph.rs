@@ -83,7 +83,7 @@ impl Graph {
         V: Visualize,
     {
         Graph {
-            buffer: self.buffer + &node.render_node(),
+            buffer: self.buffer + &node.render_node().inner(),
             ..self
         }
     }

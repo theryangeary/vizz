@@ -25,7 +25,10 @@ impl Visualize for String {
 
 impl Visualize for &String {
     fn data(&self) -> Option<Value> {
-        Some(Value::Referenced(Address::new(*self)))
+        Some(Value::referenced(
+            Address::new(*self),
+            DataDescription::from(*self),
+        ))
     }
 }
 
