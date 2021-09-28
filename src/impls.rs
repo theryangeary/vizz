@@ -68,6 +68,8 @@ where
     }
 }
 
+impl Visualize for () {}
+
 macro_rules! tuple_impls {
     ($($len:tt => ($($n:tt $name:ident)+))+) => {
         $(
