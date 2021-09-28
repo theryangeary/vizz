@@ -28,6 +28,24 @@ impl_visualize_num!(i64);
 impl_visualize_num!(i128);
 impl_visualize_num!(isize);
 
+impl<V, const N: usize> Visualize for [V; N]
+where
+    V: Visualize,
+{
+    fn associated_data(&self) -> Option<Vec<DataDescription>> {
+        match self.len() {
+            0 => None,
+            _ => Some(self.iter().map(DataDescription::from).collect()),
+        }
+    }
+}
+
+impl Visualize for bool {
+    fn data(&self) -> Option<Value> {
+        Some(Value::Owned(self.to_string()))
+    }
+}
+
 impl Visualize for String {
     fn data(&self) -> Option<Value> {
         Some(Value::Owned(self.clone()))
