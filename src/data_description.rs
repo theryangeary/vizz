@@ -82,13 +82,14 @@ impl DataDescription {
     ///
     /// The node_root_address is the name of the top level data this [DataDescription] lives inside of.
     fn render_reference(&self, node_root_address: &Address) -> Option<String> {
-        if let Some(Value::Referenced(target, _)) = &self.value {
+        if let Some(Value::Referenced(target_address, target_rendered_node)) = &self.value {
             Some(format!(
-                "\"{}\":\"{}\" -> \"{}\":\"{}\"\n",
+                "\"{}\":\"{}\" -> \"{}\":\"{}\"\n{}\n",
                 node_root_address,
                 self.address.render_value_port(),
-                target,
-                target.render_address_port()
+                target_address,
+                target_address.render_address_port(),
+                target_rendered_node
             ))
         } else {
             None
@@ -419,12 +420,14 @@ mod test {
 
     #[test]
     fn test_render_references() {
+        let referenced_rendered_node_content = "this is where the target goes";
+
         let address = Address::from("0x12345678");
         let label_string = Some(String::from("my_u8_ref"));
         let type_string = String::from("u8");
         let value = Some(Value::Referenced(
             Address::from("ref1"),
-            RenderedNode::from(String::from("unchecked")),
+            RenderedNode::from(String::from(referenced_rendered_node_content)),
         ));
         let associated_data_descriptions = None;
 
@@ -441,7 +444,7 @@ mod test {
         let type_string = String::from("alloc::string::String");
         let value = Some(Value::Referenced(
             Address::from("ref2"),
-            RenderedNode::from(String::from("unchecked")),
+            RenderedNode::from(String::from(referenced_rendered_node_content)),
         ));
         let associated_data_descriptions = None;
 
@@ -467,6 +470,6 @@ mod test {
             associated_data_descriptions,
         };
 
-        assert_eq!(data_description.render_references(&Address::from("root-node-name")), "\"root-node-name\":\"0x12345678-value\" -> \"ref1\":\"ref1-address\"\n\"root-node-name\":\"0x12345678-value\" -> \"ref2\":\"ref2-address\"\n");
+        assert_eq!(data_description.render_references(&Address::from("root-node-name")), format!( "\"root-node-name\":\"0x12345678-value\" -> \"ref1\":\"ref1-address\"\n{0}\n\"root-node-name\":\"0x12345678-value\" -> \"ref2\":\"ref2-address\"\n{0}\n", referenced_rendered_node_content));
     }
 }

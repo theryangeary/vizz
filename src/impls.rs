@@ -3,8 +3,6 @@ use crate::data_description::DataDescription;
 use crate::data_description::Value;
 use crate::Visualize;
 
-//impl<T> Visualize for &T where T: Visualize {}
-
 impl Visualize for u8 {
     fn data(&self) -> Option<Value> {
         Some(Value::Owned(self.to_string()))

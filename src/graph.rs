@@ -118,10 +118,12 @@ mod test {
 
     #[test]
     fn test_render_graph() {
-        let target = 8u8;
-        let target_address_string = Address::new(&target);
+        let target = String::from("test");
+        let target_address = Address::new(&target);
+        let target_ref = &target;
+        let target_ref_address = Address::new(&target_ref);
         let graph_id = "test_generate_graph";
-        let graph = Graph::new().set_id(graph_id).add_node(&target);
-        assert_eq!(graph.render(), format!("digraph {1} {{\n  node [shape=plaintext]\n    \"{0}\" [label=<<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"{0}-address\"><I>{0}</I></TD><TD PORT=\"{0}-type\"><B>u8</B></TD><TD PORT=\"{0}-value\">8</TD></TR></TABLE>>];\n    \n}}", target_address_string, graph_id));
+        let graph = Graph::new().set_id(graph_id).add_node(&target_ref);
+        assert_eq!(graph.render(), format!("digraph {0} {{\n  node [shape=plaintext]\n    \"{1}\" [label=<<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"{1}-address\"><I>{1}</I></TD><TD PORT=\"{1}-type\"><B>&amp;alloc::string::String</B></TD><TD PORT=\"{1}-value\"></TD></TR></TABLE>>];\n    \"{1}\":\"{1}-value\" -> \"{2}\":\"{2}-address\"\n  node [shape=plaintext]\n    \"{2}\" [label=<<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\"><TR><TD PORT=\"{2}-address\"><I>{2}</I></TD><TD PORT=\"{2}-type\"><B>alloc::string::String</B></TD><TD PORT=\"{2}-value\">test</TD></TR></TABLE>>];\n    \n\n}}", graph_id, target_ref_address, target_address));
     }
 }
