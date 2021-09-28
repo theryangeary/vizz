@@ -12,7 +12,6 @@ macro_rules! impl_visualize_data_to_string {
                 Some(Value::Owned(self.to_string()))
             }
         }
-        impl_visualize_data_to_string!(&$ty);
     };
     (&$ty:ident) => {
         impl Visualize for &$ty {
@@ -107,7 +106,10 @@ impl Visualize for String {
     }
 }
 
-impl Visualize for &String {
+impl<V> Visualize for &V
+where
+    V: Visualize,
+{
     fn data(&self) -> Option<Value> {
         Some(Value::referenced(
             Address::new(*self),
