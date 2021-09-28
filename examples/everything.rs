@@ -48,6 +48,8 @@ struct MyStruct<'a>(
     &'a str,
     (u8, usize, i16, i32, NotCopy, &'a str, bool, char),
     (),
+    Box<String>,
+    &'a Box<String>,
 );
 
 pub fn main() -> Result<(), Box<dyn Error>> {
@@ -61,6 +63,9 @@ pub fn main() -> Result<(), Box<dyn Error>> {
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
         26, 27, 28, 29, 30, 31, 32,
     ];
+    let string_to_box = String::from("box me, coward!");
+    let boxed_string = Box::new(string_to_box.clone());
+    let boxed_string2 = Box::new(string_to_box);
     let my_struct = MyStruct(
         u8::MAX,
         u16::MAX,
@@ -99,6 +104,8 @@ pub fn main() -> Result<(), Box<dyn Error>> {
         "this is my &str",
         (1, 1, 1, 1, NotCopy(String::from("yeet")), "yort", true, 'A'),
         (),
+        boxed_string,
+        &boxed_string2,
     );
 
     // create file
