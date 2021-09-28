@@ -46,6 +46,7 @@ struct MyStruct<'a>(
     &'a [usize],
     &'a [NotCopy],
     &'a str,
+    (u8, usize, i16, i32, NotCopy, &'a str, bool, char),
 );
 
 pub fn main() -> Result<(), Box<dyn Error>> {
@@ -95,6 +96,7 @@ pub fn main() -> Result<(), Box<dyn Error>> {
         &copy_array[4..16],
         &not_copy_array[0..0],
         "this is my &str",
+        (1, 1, 1, 1, NotCopy(String::from("yeet")), "yort", true, 'A'),
     );
 
     // create file
