@@ -26,10 +26,7 @@ pub fn main() -> Result<(), Box<dyn Error>> {
     let mut dot_file = File::create("my_struct.dot")?;
 
     // create graph
-    Graph::new()
-        .add_node(&my_struct)
-        .add_node(&unowned_string)
-        .write_to(&mut dot_file)?;
+    Graph::from(&my_struct).write_to(&mut dot_file)?;
 
     Ok(())
 }

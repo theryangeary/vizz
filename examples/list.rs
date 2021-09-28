@@ -27,7 +27,7 @@ pub fn main() -> std::io::Result<()> {
     let mut dot_file = File::create("list.dot")?;
 
     // create graph
-    Graph::new().add_node(&my_list).write_to(&mut dot_file)?;
+    Graph::from(&my_list).write_to(&mut dot_file)?;
 
     Ok(())
 }

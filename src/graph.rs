@@ -44,10 +44,7 @@ use crate::Visualize;
 /// let mut dot_file = File::create("/tmp/my_struct.dot").unwrap();
 ///
 /// // create graph
-/// Graph::new()
-///     .set_id("my_test_graph")
-///     .add_node(&my_struct)
-///     .add_node(&unowned_string)
+/// Graph::from(&my_struct)
 ///     .write_to(&mut dot_file)
 ///     .unwrap();
 /// ```
@@ -101,6 +98,15 @@ impl Graph {
     /// Write the DOT file to the filesystem
     pub fn write_to<W: Write>(self, writer: &mut W) -> Result<()> {
         write!(writer, "{}", self.render())
+    }
+}
+
+impl<V> From<&V> for Graph
+where
+    V: Visualize,
+{
+    fn from(v: &V) -> Self {
+        Graph::new().add_node(v)
     }
 }
 
