@@ -12,8 +12,20 @@ macro_rules! impl_visualize_data_to_string {
                 Some(Value::Owned(self.to_string()))
             }
         }
+        impl_visualize_data_to_string!(&$ty);
+    };
+    (&$ty:ident) => {
+        impl Visualize for &$ty {
+            fn data(&self) -> Option<Value> {
+                Some(Value::Owned(self.to_string()))
+            }
+        }
     };
 }
+
+impl_visualize_data_to_string!(bool);
+impl_visualize_data_to_string!(char);
+impl_visualize_data_to_string!(&str);
 
 macro_rules! impl_visualize_num {
     ($ty:ident) => {
@@ -45,9 +57,6 @@ where
         }
     }
 }
-
-impl_visualize_data_to_string!(bool);
-impl_visualize_data_to_string!(char);
 
 impl<'a, V> Visualize for &'a [V]
 where
