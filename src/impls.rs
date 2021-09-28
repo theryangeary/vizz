@@ -5,17 +5,28 @@ use crate::Visualize;
 
 use std::ops::Deref;
 
-impl Visualize for u8 {
-    fn data(&self) -> Option<Value> {
-        Some(Value::Owned(self.to_string()))
-    }
+macro_rules! impl_visualize_num {
+    ($ty:ident) => {
+        impl Visualize for $ty {
+            fn data(&self) -> Option<Value> {
+                Some(Value::Owned(self.to_string()))
+            }
+        }
+    };
 }
 
-impl Visualize for usize {
-    fn data(&self) -> Option<Value> {
-        Some(Value::Owned(self.to_string()))
-    }
-}
+impl_visualize_num!(u8);
+impl_visualize_num!(u16);
+impl_visualize_num!(u32);
+impl_visualize_num!(u64);
+impl_visualize_num!(u128);
+impl_visualize_num!(usize);
+impl_visualize_num!(i8);
+impl_visualize_num!(i16);
+impl_visualize_num!(i32);
+impl_visualize_num!(i64);
+impl_visualize_num!(i128);
+impl_visualize_num!(isize);
 
 impl Visualize for String {
     fn data(&self) -> Option<Value> {
